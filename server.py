@@ -35,10 +35,47 @@ def send_msg(clients, friend_list, dest, sender_sock, username_cli, msg):
     
 
 def add_friend(clients, friend_list, dest, sender_sock, username_cli):
+    if (username_cli, dest) in friend_list and (dest, username_cli) in friend_list:
+        msg = "already friend with {}".format(dest)
+        sender_sock.send(bytes(msg, "utf-8"))
+    elif (username_cli, dest) in friend_list and (dest, username_cli) not in friend_list:
+        msg = "already request friend to {}, but still not accepted".format(dest)
+        sender_sock.send(bytes(msg, "utf-8"))
+    elif (dest, username_cli) in friend_list and (username_cli, dest) not in friend_list:
+        msg = "{} already request to be friend with you, use accept_friend command to accept".format(dest)
+        sender_sock.send(bytes(msg, "utf-8"))
+    else:
+        friend_list.add((username_cli, dest))
+        # send to sender
+        msg = "request sent"
+        sender_sock.send(bytes(msg, "utf-8"))
+        # send to receiver
+        sock_cli = clients[dest][0]
+        msg = "{} send you a friend request".format(username_cli)
+        sock_cli.send(bytes(msg, "utf-8"))
     
+    #check friend list
+    print(friend_list)
 
 def accept_friend(clients, friend_list, dest, sender_sock, username_cli):
+    if (username_cli, dest) in friend_list and (dest, username_cli) in friend_list:
+        msg = "already friend with {}".format(dest)
+        sender_sock.send(bytes(msg, "utf-8"))
+    elif (dest, username_cli) in friend_list and (username_cli, dest) not in friend_list:
+        friend_list.add((username_cli, dest))
+        # send to sender
+        msg = "you are now friend with {}".format(dest)
+        sender_sock.send(bytes(msg, "utf-8"))
+        # send to receiver
+        sock_cli = clients[dest][0]
+        msg = "{} accepted your friend request".format(username_cli)
+        sock_cli.send(bytes(msg, "utf-8"))
+    else:
+        msg = "you have no friend request from {}".format(dest)
+        sender_sock.send(bytes(msg, "utf-8"))
     
+    # check friend list
+    print(friend_list)
 
 
 sock_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
