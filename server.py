@@ -28,10 +28,19 @@ def read_cmd(clients, friend_list, sock_cli, addr_cli, username_cli):
     print("Connection closed", addr_cli)
 
 def send_broadcast(clients, friend_list, sender_addr_cli, username_cli, msg):
-   
+   for key in list(clients.keys()):
+        if not (sender_addr_cli[0] == clients[key][1][0] and sender_addr_cli[1] == clients[key][1][1]):
+            if (key, username_cli) in friend_list and (username_cli, key) in friend_list:
+                clients[key][0].send(bytes(msg, "utf-8"))
 
 def send_msg(clients, friend_list, dest, sender_sock, username_cli, msg):
-    
+    #check friend
+    if (dest, username_cli) in friend_list and (username_cli, dest) in friend_list:
+        sock_cli = clients[dest][0]
+        sock_cli.send(bytes(msg, "utf-8"))
+    else:
+        error_msg = "Not friend with {}".format(dest)
+        sender_sock.send(bytes(error_msg, "utf-8"))
     
 
 def add_friend(clients, friend_list, dest, sender_sock, username_cli):
